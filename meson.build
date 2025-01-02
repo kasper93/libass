@@ -50,6 +50,8 @@ elif cc.get_id() == 'msvc'
         '/we4317', # not enough arguments for format string
         '/we4473', # same as above
         '/we4474', # too many arguments for format string
+        '/wd4244',
+        '/wd4018',
     ]
 endif
 

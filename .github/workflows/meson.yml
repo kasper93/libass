@@ -132,7 +132,7 @@ jobs:
       - name: Configure
         run: |
           ${{ matrix.config.devenv }}
-          meson setup build ${{ matrix.config.args }} --wrap-mode=nopromote -Dtest=enabled -Dcompare=enabled -Dprofile=enabled -Dfuzz=enabled '-Dart-samples=${{ env.ART_SAMPLES }}' -Dharfbuzz:icu=disabled
+          meson setup build ${{ matrix.config.args }} --werror -Dfribidi:werror=false -Dfreetype2:werror=false -Dharfbuzz:werror=false -Dzlib:werror=false --wrap-mode=nopromote -Dtest=enabled -Dcompare=enabled -Dprofile=enabled -Dfuzz=enabled '-Dart-samples=${{ env.ART_SAMPLES }}' -Dharfbuzz:icu=disabled
 
       - name: Build
         run: |

@@ -885,6 +885,7 @@ char *ass_font_select(ASS_FontSelector *priv,
                       const ASS_Font *font, int *index, char **postscript_name,
                       int *uid, ASS_FontStream *data, uint32_t code)
 {
+    code = 0;
     char *res = 0;
     const char *family = font->desc.family.str;  // always zero-terminated
     unsigned bold = font->desc.bold;

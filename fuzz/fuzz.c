@@ -400,6 +400,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (!LEN_IN_RANGE(size))
         return 0;
 
+#ifdef FONTCONFIG_SYSROOT
+#define STR_(x) #x
+#define STR(x) STR_(x)
+    setenv("FONTCONFIG_SYSROOT", STR(FONTCONFIG_SYSROOT), 1);
+#endif
+
     ASS_Track *track = NULL;
 
     // All return values but zero and -1 are reserved

@@ -390,6 +390,33 @@ int main(int argc, char *argv[])
     return 0;
 }
 #elif ASS_FUZZMODE == FUZZMODE_LIBFUZZER
+#include <fontconfig/fontconfig.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    #ifdef ASSFUZZ_FONTCONFIG_SYSROOT
+    #define STR_(x) #x
+    #define STR(x) STR_(x)
+        setenv("FONTCONFIG_SYSROOT", STR(ASSFUZZ_FONTCONFIG_SYSROOT), 1);
+    #endif
+
+    // Build the font list — this implicitly causes a font scan and cache generation
+    FcPattern *pat = FcPatternCreate();
+    FcObjectSet *os = FcObjectSetBuild(FC_FAMILY, FC_STYLE, FC_FILE, (char *)0);
+    FcFontSet *fs = FcFontList(NULL, pat, os);
+
+    if (fs) {
+        printf("Found %d fonts.\n", fs->nfont);
+        FcFontSetDestroy(fs);
+    } else {
+        fprintf(stderr, "Font list creation failed.\n");
+    }
+
+    return 0;
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     // OSS Fuzz docs recommend just returning 0 on too large input
@@ -399,12 +426,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     // https://github.com/google/oss-fuzz/issues/11983
     if (!LEN_IN_RANGE(size))
         return 0;
-
-#ifdef FONTCONFIG_SYSROOT
-#define STR_(x) #x
-#define STR(x) STR_(x)
-    setenv("FONTCONFIG_SYSROOT", STR(FONTCONFIG_SYSROOT), 1);
-#endif
 
     ASS_Track *track = NULL;
 

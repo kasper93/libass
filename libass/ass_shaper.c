@@ -303,11 +303,19 @@ get_glyph_nominal(hb_font_t *font, void *font_data, hb_codepoint_t unicode,
                   hb_codepoint_t *glyph, void *user_data)
 {
     struct ass_shaper_metrics_data *metrics_priv = font_data;
-    FT_Face face = metrics_priv->hash_key.font->faces[metrics_priv->hash_key.face_index];
+    ASS_Font *ass_font = metrics_priv->hash_key.font;
+    FT_Face face = ass_font->faces[metrics_priv->hash_key.face_index];
 
-    *glyph = ass_font_index_magic(face, unicode);
-    if (*glyph)
-        *glyph = FT_Get_Char_Index(face, *glyph);
+    // the font cmap cache is usually already primed for this codepoint
+    // by ass_font_get_index() during shape run splitting
+    ASS_FontCmapEntry *ce = &ass_font->cmap_cache[ass_font_cmap_slot(unicode)];
+    if (ce->symbol == unicode && ce->face_index == metrics_priv->hash_key.face_index) {
+        *glyph = ce->glyph_index;
+    } else {
+        *glyph = ass_font_index_magic(face, unicode);
+        if (*glyph)
+            *glyph = FT_Get_Char_Index(face, *glyph);
+    }
     if (!*glyph)
         return false;
 
